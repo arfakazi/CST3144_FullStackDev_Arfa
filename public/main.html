@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Ara's Classes</title>
+        <!-- Vue.js Import -->
+        <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+        <!-- Font Awesome Icons -->
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css"
+        />
+        <!-- CSS Link -->
+        <link rel="stylesheet" href="css/frontend.css" />
+    </head>
+    <body>
+        <div id="app">
+            <header>
+                <a href="#" class="logo">
+                    <i class="fa-solid fa-shop"></i>
+                </a>
+                <h1 v-text="sitename"></h1>
+
+                <ul class="navbar">
+                    <li><a href="#home" class="home-active">Home</a></li>
+                    <li><a href="#categories">Categories</a></li>
+                    <li><a href="#nbClass">Classes</a></li>
+                    <li><a href="#aboutus">About Us</a></li>
+                </ul>
+
+                <button v-on:click="toggleCheckout">
+                    {{ cartItemCount }} <span class="fas fa-cart-plus"></span> Checkout
+                </button>
+            </header>
+
+            <main>
+                <div v-if="showClass">
+                    <div class="left-panel">
+                        <h3>Search & Sort</h3>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            class="search-bar"
+                            v-model="searchQuery"
+                        />
+                        <div class="sort-options">
+                            <h4>Sort By</h4>
+                            <label>
+                                <input type="radio" value="price" v-model="sortCriteria" /> Price
+                            </label>
+                            <label>
+                                <input type="radio" value="availability" v-model="sortCriteria" />
+                                Availability
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="content">
+                        <div v-for="Class in filteredClasses" class="product-card">
+                            <figure>
+                                <img v-bind:src="Class.image" alt="Class Image" />
+                            </figure>
+                            <h2 v-text="Class.title"></h2>
+                            <p v-html="Class.description"></p>
+                            <p class="price">Price: {{ Class.price }}</p>
+                            <button v-on:click="addToCart(Class)" v-if="canAddToCart(Class)">
+                                Add to cart
+                            </button>
+                            <button disabled v-else>Out of Stock</button>
+                            <span
+                                v-if="Class.availableInventory === cartCount(Class.id)"
+                                class="all-out"
+                                >All out!</span
+                            >
+                            <span
+                                v-else-if="Class.availableInventory - cartCount(Class.id) < 5"
+                                class="items-left"
+                                >Only {{ Class.availableInventory - cartCount(Class.id) }}
+                                left!</span
+                            >
+                            <span v-else>Buy now!</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-else>
+                    <h2>Checkout</h2>
+                    <p>
+                        <strong>First Name:</strong>
+                        <input v-model.trim="order.firstName" />
+                    </p>
+                    <p>
+                        <strong>Last Name:</strong>
+                        <input v-model.trim="order.lastName" />
+                    </p>
+                    <p><strong>Address:</strong> <input v-model="order.address" /></p>
+                    <p><strong>City:</strong> <input v-model="order.city" /></p>
+                    <p>
+                        <strong>State:</strong>
+                        <select v-model="order.state" class="form-control">
+                            <option disabled value="">Select State</option>
+                            <option v-for="(state, key) in states" :value="key">{{ state }}</option>
+                        </select>
+                    </p>
+                    <p><strong>Zip:</strong> <input v-model.number="order.zip" type="number" /></p>
+                    <p>
+                        <input type="checkbox" id="gift" value="true" v-model="order.gift" />
+                        <label for="gift">Ship as a Gift?</label>
+                    </p>
+                    <p>
+                        <input type="radio" id="home" value="Home" v-model="order.method" />
+                        <label for="home">Home</label>
+                        <input type="radio" id="business" value="Business" v-model="order.method" />
+                        <label for="business">Business</label>
+                    </p>
+
+                    <h2>Order Summary</h2>
+                    <p>First Name: {{ order.firstName }}</p>
+                    <p>Last Name: {{ order.lastName }}</p>
+                    <p>Address: {{ order.address }}</p>
+                    <p>City: {{ order.city }}</p>
+                    <p>State: {{ order.state }}</p>
+                    <p>Zip: {{ order.zip }}</p>
+                    <p>Gift: {{ order.gift ? "Yes" : "No" }}</p>
+                    <p>Delivery: {{ order.method }}</p>
+
+                    <button v-on:click="submitForm">Place Order</button>
+                </div>
+            </main>
+        </div>
+
+        <script src="js/classes.js"></script>
+        <script>
+            let webstore = new Vue({
+                el: "#app",
+                data: {
+                    sitename: "Ara's Classes",
+                    classes: classes, // Array from `classes.js`
+                    cart: [],
+                    searchQuery: "",
+                    sortCriteria: "",
+                    showClass: true,
+                    order: {
+                        firstName: "",
+                        lastName: "",
+                        address: "",
+                        city: "",
+                        zip: "",
+                        state: "",
+                        method: "Home",
+                        gift: false,
+                    },
+                    states: {
+                        AD: "Abu Dhabi",
+                        DU: "Dubai",
+                        SH: "Sharjah",
+                        AJ: "Ajman",
+                        FJ: "Fujairah",
+                        RK: "Ras Al Khaimah",
+                        UQ: "Umm Al Quwain",
+                    },
+                },
+                methods: {
+                    toggleCheckout() {
+                        this.showClass = !this.showClass;
+                    },
+                    addToCart(Class) {
+                        this.cart.push(Class.id);
+                    },
+                    canAddToCart(Class) {
+                        return Class.availableInventory > this.cartCount(Class.id);
+                    },
+                    cartCount(id) {
+                        return this.cart.filter((item) => item === id).length;
+                    },
+                    submitForm() {
+                        alert("Order placed successfully!");
+                    },
+                },
+                computed: {
+                    cartItemCount() {
+                        return this.cart.length || 0;
+                    },
+                    filteredClasses() {
+                        let filtered = this.classes.filter((Class) =>
+                            Class.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        );
+                        if (this.sortCriteria === "price") {
+                            filtered.sort((a, b) => a.price - b.price);
+                        } else if (this.sortCriteria === "availability") {
+                            filtered.sort((a, b) => b.availableInventory - a.availableInventory);
+                        }
+                        return filtered;
+                    },
+                },
+            });
+        </script>
+    </body>
+</html>
