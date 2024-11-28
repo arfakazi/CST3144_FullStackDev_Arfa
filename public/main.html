@@ -15,7 +15,7 @@
         <link rel="stylesheet" href="css/frontend.css" />
     </head>
     <body>
-        <div id="app">
+        <div id="app" class="container">
             <header>
                 <a href="#" class="logo">
                     <i class="fa-solid fa-shop"></i>
@@ -36,7 +36,7 @@
 
             <main>
                 <div v-if="showClass">
-                    <div class="left-panel">
+                    <div class="search-sort">
                         <h3>Search & Sort</h3>
                         <input
                             type="text"
@@ -76,9 +76,9 @@
                             <span
                                 v-else-if="Class.availableInventory - cartCount(Class.id) < 5"
                                 class="items-left"
-                                >Only {{ Class.availableInventory - cartCount(Class.id) }}
-                                left!</span
                             >
+                                Only {{ Class.availableInventory - cartCount(Class.id) }} left!
+                            </span>
                             <span v-else>Buy now!</span>
                         </div>
                     </div>
@@ -111,7 +111,12 @@
                     <p>
                         <input type="radio" id="home" value="Home" v-model="order.method" />
                         <label for="home">Home</label>
-                        <input type="radio" id="business" value="Business" v-model="order.method" />
+                        <input
+                            type="radio"
+                            id=" business"
+                            value="Business"
+                            v-model="order.method"
+                        />
                         <label for="business">Business</label>
                     </p>
 

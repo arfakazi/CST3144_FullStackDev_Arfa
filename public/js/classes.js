@@ -4,7 +4,7 @@ let classes = [
         title: "Piano Classes",
         description: "",
         price: 250,
-        image: "images/piano.jpeg",
+        image: "static/piano.jpeg",
         location: "Music Room 3",
         category: "Music",
         availableInventory: 5,
