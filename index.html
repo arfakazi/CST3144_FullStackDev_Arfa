@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Ara's Classes</title>
-        <!-- Vue.js Import -->
+        <!-- Vue.js CDN for reactive framework support -->
         <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
         <!-- Font Awesome Icons -->
         <link
@@ -14,49 +14,60 @@
         <!-- CSS Link -->
         <link rel="stylesheet" href="css/frontend.css" />
     </head>
+
     <body>
         <div id="app" class="container">
+            <!-- Header Section -->
             <header>
-                <a href="#" class="logo">
-                    <i class="fa-solid fa-shop"></i>
+                <a href="#app" class="logo">
+                    <span class="fas fa-school"></span>
                 </a>
                 <h1 v-text="sitename"></h1>
-
                 <ul class="navbar">
-                    <li><a href="#home" class="home-active">Home</a></li>
-                    <li><a href="#nbClass">Classes</a></li>
+                    <li><a href="#app">Home</a></li>
                     <li><a href="#aboutus">About Us</a></li>
                 </ul>
-
                 <button v-on:click="toggleCheckout">
                     {{ cartItemCount }} <span class="fas fa-cart-plus"></span> Checkout
                 </button>
             </header>
 
+            <!-- Main Content Area -->
             <main>
+                <!-- Class Display Section -->
                 <div v-if="showClass">
                     <div class="search-sort">
-                        <h3>Search & Sort</h3>
+                        <h3>Search:</h3>
                         <input
                             type="text"
-                            placeholder="Search..."
+                            placeholder="Search by title..."
                             class="search-bar"
                             v-model="searchQuery"
+                            v-on:input="searchClasses"
                         />
-                        <div class="sort-options">
-                            <h4>Sort By</h4>
-                            <label>
-                                <input type="radio" value="price" v-model="sortCriteria" /> Price
-                            </label>
-                            <label>
-                                <input type="radio" value="availability" v-model="sortCriteria" />
-                                Availability
-                            </label>
+                        <h3>Sort:</h3>
+                        <div class="sort-controls">
+                            <button v-on:click="sortBy('title', 'asc')">Sort by Name (A-Z)</button>
+                            <button v-on:click="sortBy('title', 'desc')">Sort by Name (Z-A)</button>
+                            <button v-on:click="sortBy('availableInventory', 'asc')">
+                                Sort by Availability (Low-High)
+                            </button>
+                            <button v-on:click="sortBy('availableInventory', 'desc')">
+                                Sort by Availability (High-Low)
+                            </button>
+                            <button v-on:click="sortBy('price', 'asc')">
+                                Sort by Price (Low-High)
+                            </button>
+                            <button v-on:click="sortBy('price', 'desc')">
+                                Sort by Price (High-Low)
+                            </button>
+
+                            <button v-on:click="resetSort">Reset View</button>
                         </div>
                     </div>
 
                     <div class="content">
-                        <div v-for="Class in filteredClasses" class="product-card">
+                        <div v-for="Class in filteredClasses" :key="Class._id" class="product-card">
                             <figure>
                                 <img v-bind:src="getLink(Class.image)" alt="Class Image" />
                             </figure>
@@ -75,64 +86,112 @@
                             <span
                                 v-else-if="Class.availableInventory - cartCount(Class._id) < 5"
                                 class="items-left"
+                                >Only {{ Class.availableInventory - cartCount(Class._id) }}
+                                left!</span
                             >
-                                Only {{ Class.availableInventory - cartCount(Class._id) }} left!
-                            </span>
                             <span v-else>Buy now!</span>
                         </div>
                     </div>
                 </div>
 
-                <div v-else>
-                    <h2>Checkout</h2>
-                    <p>
-                        <strong>First Name:</strong>
-                        <input v-model.trim="order.firstName" />
-                    </p>
-                    <p>
-                        <strong>Last Name:</strong>
-                        <input v-model.trim="order.lastName" />
-                    </p>
-                    <p><strong>Address:</strong> <input v-model="order.address" /></p>
-                    <p><strong>City:</strong> <input v-model="order.city" /></p>
-                    <p>
-                        <strong>State:</strong>
-                        <select v-model="order.state" class="form-control">
-                            <option disabled value="">Select State</option>
-                            <option v-for="(state, key) in states" :value="key">{{ state }}</option>
-                        </select>
-                    </p>
-                    <p><strong>Zip:</strong> <input v-model.number="order.zip" type="number" /></p>
-                    <p>
-                        <input type="checkbox" id="gift" value="true" v-model="order.gift" />
-                        <label for="gift">Ship as a Gift?</label>
-                    </p>
-                    <p>
-                        <input type="radio" id="home" value="Home" v-model="order.method" />
-                        <label for="home">Home</label>
-                        <input
-                            type="radio"
-                            id=" business"
-                            value="Business"
-                            v-model="order.method"
-                        />
-                        <label for="business">Business</label>
-                    </p>
+                <!-- Checkout Section -->
+                <div v-else class="checkout-container">
+                    <div class="cart-section">
+                        <h3>Your Cart</h3>
+                        <div v-if="cart.length === 0">Your cart is empty.</div>
+                        <ul>
+                            <li v-for="item in uniqueCartItems" :key="item._id">
+                                {{ item.title }} - Price: {{ item.price }} (Count: {{ }})
+                                <button v-on:click="removeFromCart(item._id)">Remove</button>
+                            </li>
+                        </ul>
+                    </div>
 
-                    <h2>Order Summary</h2>
-                    <p>First Name: {{ order.firstName }}</p>
-                    <p>Last Name: {{ order.lastName }}</p>
-                    <p>Address: {{ order.address }}</p>
-                    <p>City: {{ order.city }}</p>
-                    <p>State: {{ order.state }}</p>
-                    <p>Zip: {{ order.zip }}</p>
-                    <p>Gift: {{ order.gift ? "Yes" : "No" }}</p>
-                    <p>Delivery: {{ order.method }}</p>
+                    <div class="order-form">
+                        <h2>Checkout</h2>
+                        <div class="form-group">
+                            <label for="firstName"><strong>First Name:</strong></label>
+                            <input id="firstName" v-model.trim="order.firstName" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName"><strong>Last Name:</strong></label>
+                            <input id="lastName" v-model.trim="order.lastName" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="address"><strong>Address:</strong></label>
+                            <input id="address" v-model="order.address" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label for="phone"><strong>Phone Number:</strong></label>
+                            <input id="phone" v-model="order.phone" type="number" />
+                        </div>
+                        <div class="form-group">
+                            <label for="state"><strong>State:</strong></label>
+                            <select id="state" v-model="order.state" class="form-control">
+                                <option disabled value="">Select State</option>
+                                <option v-for="(state, key) in states" :value="key">
+                                    {{ state }}
+                                </option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="zip"><strong>Zip:</strong></label>
+                            <input id="zip" v-model.number="order.zip" type="number" />
+                        </div>
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input
+                                    type="checkbox"
+                                    id="gift"
+                                    value="true"
+                                    v-model="order.gift"
+                                />
+                                <label for="gift">Ship as a Gift?</label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <strong>Delivery Method:</strong>
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input
+                                        type="radio"
+                                        id="home"
+                                        value="Home"
+                                        v-model="order.method"
+                                    />
+                                    <label for="home">Home</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input
+                                        type="radio"
+                                        id="business"
+                                        value="Business"
+                                        v-model="order.method"
+                                    />
+                                    <label for="business">Business</label>
+                                </div>
+                            </div>
+                        </div>
 
-                    <button v-on:click="submitForm">Place Order</button>
+                        <h2>Order Summary</h2>
+                        <div class="order-summary">
+                            <p>First Name: {{ order.firstName }}</p>
+                            <p>Last Name: {{ order.lastName }}</p>
+                            <p>Address: {{ order.address }}</p>
+                            <p>Phone: {{ order.phone }}</p>
+                            <p>State: {{ order.state }}</p>
+                            <p>Zip: {{ order.zip }}</p>
+                            <p>Gift: {{ order.gift ? "Yes" : "No" }}</p>
+                            <p>Delivery: {{ order.method }}</p>
+                        </div>
+
+                        <button v-on:click="submitForm" class="submit-button">Place Order</button>
+                    </div>
                 </div>
             </main>
-            <footer>
+
+            <!-- Footer Section -->
+            <footer id="aboutus">
                 <div class="footer-container">
                     <div class="footer-about">
                         <h4>About Us</h4>
@@ -144,17 +203,15 @@
                     <div class="footer-links">
                         <h4>Quick Links</h4>
                         <ul>
-                            <li><a href="#home">Home</a></li>
-                            <li><a href="#nbClass">Classes</a></li>
+                            <li><a href="#app">Home</a></li>
                             <li><a href="#aboutus">About Us</a></li>
-                            <li><a href="#contact">Contact</a></li>
                         </ul>
                     </div>
                     <div class="footer-contact">
                         <h4>Contact Us</h4>
-                        <p>Email: info@arasclasses.com</p>
-                        <p>Phone: +1 (123) 456-7890</p>
-                        <p>Address: 123 Learning Lane, Knowledge City, EDU</p>
+                        <p>Email: arasclasses@corp.co</p>
+                        <p>Phone: +971 50 1234567</p>
+                        <p>Address: 123 Learning Lane, Knowledge Village, EDU</p>
                     </div>
                 </div>
                 <div class="footer-bottom">
@@ -162,7 +219,6 @@
                 </div>
             </footer>
         </div>
-
         <script>
             let webstore = new Vue({
                 el: "#app",
@@ -170,14 +226,14 @@
                     sitename: "Ara's Classes",
                     classes: [],
                     cart: [],
-                    searchQuery: "",
-                    sortCriteria: "",
+                    currentSort: null,
+                    sortOrder: null,
                     showClass: true,
                     order: {
                         firstName: "",
                         lastName: "",
                         address: "",
-                        city: "",
+                        phone: "",
                         zip: "",
                         state: "",
                         method: "Home",
@@ -192,6 +248,7 @@
                         RK: "Ras Al Khaimah",
                         UQ: "Umm Al Quwain",
                     },
+                    searchQuery: "",
                 },
                 created() {
                     this.getLessons();
@@ -206,48 +263,121 @@
                         })
                             .then((response) => response.json())
                             .then((responseJSON) => {
-                                // Map fetched data to ensure _id is a string
                                 this.classes = responseJSON.map((item) => ({
                                     ...item,
                                     _id: String(item._id),
                                 }));
                             })
                             .catch((error) => {
-                                console.error("Error fetching subjects:", error);
+                                console.error("Error fetching Classes:", error);
                             });
                     },
-                    getLink(url) {
-                        return `https://aras-classes.onrender.com/${url}`;
+                    sortBy(key, order) {
+                        this.currentSort = key;
+                        this.sortOrder = order;
+
+                        // Sort logic
+                        this.classes.sort((a, b) => {
+                            const valA = a[key];
+                            const valB = b[key];
+
+                            if (order === "asc") return valA > valB ? 1 : -1;
+                            if (order === "desc") return valA < valB ? 1 : -1;
+                            return 0;
+                        });
+                    },
+                    resetSort() {
+                        this.currentSort = null;
+                        this.sortOrder = null;
+                        this.getLessons(); // Reset to original order
+                    },
+                    searchClasses() {
+                        const query = this.searchQuery.trim();
+
+                        if (query === "") {
+                            this.getLessons(); // Fetch all Classes if search query is empty
+                            return;
+                        }
+
+                        // Fetch search results from the backend
+                        fetch(`https://aras-classes.onrender.com/search/Lessons?query=${query}`, {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        })
+                            .then((response) => response.json())
+                            .then((data) => {
+                                this.classes = data.map((item) => ({
+                                    ...item,
+                                    _id: String(item._id),
+                                }));
+                            })
+                            .catch((error) => {
+                                console.error("Error performing search:", error);
+                            });
                     },
                     toggleCheckout() {
                         this.showClass = !this.showClass;
                     },
                     addToCart(Class) {
-                        this.cart.push(Class._id);
+                        this.cart.push(Class);
+                    },
+                    removeFromCart(classId) {
+                        this.cart = this.cart.filter((item) => item._id !== classId);
                     },
                     canAddToCart(Class) {
                         return Class.availableInventory > this.cartCount(Class._id);
                     },
                     cartCount(id) {
-                        return this.cart.filter((item) => item === id).length;
+                        return this.cart.filter((item) => item._id === id).length;
+                    },
+                    getLink(image) {
+                        return `https://aras-classes.onrender.com/${image}`;
                     },
                     submitForm() {
                         alert("Order placed successfully!");
+                        this.cart = [];
+                        this.order = {
+                            firstName: "",
+                            lastName: "",
+                            address: "",
+                            phone: "",
+                            zip: "",
+                            state: "",
+                            method: "Home",
+                            gift: false,
+                        };
+                        this.showClass = true;
                     },
                 },
                 computed: {
                     cartItemCount() {
                         return this.cart.length || 0;
                     },
+                    uniqueCartItems() {
+                        return [...new Set(this.cart.map((item) => item._id))].map((id) => {
+                            return this.classes.find((classItem) => classItem._id === id);
+                        });
+                    },
                     filteredClasses() {
+                        // Filter by search query
                         let filtered = this.classes.filter((Class) =>
                             Class.title.toLowerCase().includes(this.searchQuery.toLowerCase())
                         );
-                        if (this.sortCriteria === "price") {
-                            filtered.sort((a, b) => a.price - b.price);
-                        } else if (this.sortCriteria === "availability") {
-                            filtered.sort((a, b) => b.availableInventory - a.availableInventory);
+
+                        // Sort by selected criteria
+                        if (this.currentSort) {
+                            filtered.sort((a, b) => {
+                                const valA = a[this.currentSort];
+                                const valB = b[this.currentSort];
+
+                                if (this.sortOrder === "asc") return valA > valB ? 1 : -1;
+                                if (this.sortOrder === "desc") return valA < valB ? 1 : -1;
+                                return 0;
+                            });
                         }
+
                         return filtered;
                     },
                 },

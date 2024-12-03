@@ -6,10 +6,14 @@ body {
     background-color: #f7f7f7;
 }
 
+html {
+    scroll-behavior: smooth;
+}
+
 .container {
-    max-width: 1200px; /* Set a max width for the container */
-    margin: 0 auto; /* Center the container */
-    padding: 0; /* Remove padding to fit the screen */
+    max-width: 1200px; 
+    margin: 0 auto; 
+    padding: 0; 
 }
 
 /* Header Styles */
@@ -20,17 +24,24 @@ header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    position: fixed; /* Fix the header to the top */
-    top: 0; /* Align to the top */
-    left: 0; /* Align to the left */
-    right: 0; /* Align to the right */
-    z-index: 1000; /* Ensure it stays above other content */
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    z-index: 1000; 
 }
 
 .logo {
-    color: white;
-    text-decoration: none;
-    font-size: 24px;
+    color: white; /* Text color */
+    text-decoration: none; /* Remove underline from links */
+    font-size: 48px; /* Font size for the logo */
+    display: flex; /* Use flexbox for alignment */
+    align-items: center; /* Center vertically */
+    margin-right: 20px; /* Space between logo and the title */
+}
+
+.logo span {
+    margin-right: 10px; /* Space between icon and text (if any) */
 }
 
 .navbar {
@@ -55,8 +66,9 @@ header {
     border-radius: 4px;
 }
 
+/* Button Styles */
 button {
-    background-color: #febd69;
+    background-color: #febd69; /* Default button color */
     color: black;
     border: none;
     padding: 10px 15px;
@@ -66,22 +78,76 @@ button {
 }
 
 button:hover {
-    background-color: #f3a847;
+    background-color: #f3a847; /* Hover effect for available items */
+}
+
+/* Out of Stock Button */
+button:disabled {
+    background-color: #d3d3d3; /* Grey color for out of stock */
+    cursor: not-allowed; /* Change cursor to indicate not clickable */
+}
+
+/* All Out Text Styles */
+.all-out {
+    color: red; /* Red text for "All out!" message */
+    font-weight: bold; /* Make the text bold for emphasis */
+}
+
+/* Items Left Text Styles */
+.items-left {
+    color: darkgoldenrod; /* Yellow text for items left message */
+    font-weight: bold; /* Make the text bold for emphasis */
 }
 
 /* Main Content Styles */
 main {
     display: flex;
-    padding: 80px 20px 20px; /* Add top padding to avoid overlap with fixed header */
+    padding: 100px 20px 20px; /* Add top padding to avoid overlap with fixed header */
 }
 
 /* Search & Sort Styles */
+/* Search & Sort Styles */
 .search-sort {
-    width: auto; /* Fixed width for the search and sort section */
     padding: 20px;
-    margin-right: 20px;
-    margin-bottom: 20px;
+    margin: 20px 0 20px; /* Increased top margin for more space from the header */
     border-radius: 4px;
+    background-color: #fff; /* White background for better visibility */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+.search-sort h3 {
+    margin: 10px 0; /* Margin for heading */
+    font-size: 18px; /* Slightly larger font size for headings */
+}
+
+.search-bar {
+    width: 100%; /* Full width for the search input */
+    padding: 10px; /* Padding for the input field */
+    margin-bottom: 15px; /* Space below the input field */
+    margin-right: 10px;
+    border: 1px solid #ccc; /* Border for the input field */
+    border-radius: 4px; /* Rounded corners for the input field */
+}
+
+.sort-controls {
+    display: flex; /* Use flexbox for better alignment */
+    flex-wrap: wrap; /* Allow wrapping for buttons on smaller screens */
+    gap: 10px; /* Space between buttons */
+}
+
+.sort-controls button {
+    flex: 1; /* Allow buttons to grow equally */
+    min-width: 150px; /* Minimum width for buttons */
+    padding: 10px; /* Padding for buttons */
+    border: none; /* Remove default border */
+    border-radius: 4px; /* Rounded corners for buttons */
+    background-color: #febd69; /* Default button color */
+    color: black; /* Text color */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s; /* Smooth background color transition */
+}
+
+.sort-controls button:hover {
+    background-color: #f3a847; /* Darker color on hover */
 }
 
 /* Content Styles */
@@ -112,58 +178,130 @@ main {
     color: #b12704;
     margin: 10px 0;
 }
-
-/* Checkout Form Styles */
+/* General Styles */
 h2 {
-    margin-top: 20px;
+    margin-top: 0; /* Remove top margin for h2 */
+    margin-bottom: 20px; /* Space below the heading */
 }
 
+/* Checkout Container Styles */
+.checkout-container {
+    display: flex; /* Use flexbox for layout */
+    justify-content: space-between; /* Space between cart and order form */
+    padding: 20px; /* Padding around the container */
+    gap: 20px; /* Space between the cart and order form */
+    width: 100%; /* Full width of the page */
+    max-width: 1200px; /* Optional: Set a max width for larger screens */
+    margin: 0 auto; /* Center the container on larger screens */
+}
+
+/* Cart Section Styles */
+.cart-section {
+    flex: 1; /* Allow the cart section to take available space */
+    max-width: 400px; /* Set a max width for the cart section */
+    padding: 20px; /* Padding inside the cart section */
+    border: 1px solid #ccc; /* Border around the cart */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background color */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.cart-section h3 {
+    margin-top: 0; /* Remove top margin for h3 */
+}
+
+/* Order Form Section Styles */
+.order-form {
+    flex: 2; /* Allow the order form to take more space */
+    padding: 20px; /* Padding inside the order form */
+    border: 1px solid #ccc; /* Border around the order form */
+    border-radius: 8px; /* Rounded corners */
+    background-color: #fff; /* White background for the form */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Form Group Styles */
+.form-group {
+    margin-bottom: 15px; /* Space between form groups */
+}
+
+label {
+    display: block; /* Make labels block elements */
+    margin-bottom: 5px; /* Space below labels */
+    font-weight: bold; /* Bold text for labels */
+}
+
+/* Input Styles */
 input[type="text"],
 input[type="number"],
 select {
-    width: 100%;
-    padding: 8px;
-    margin: 5px 0 15px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    width: 100%; /* Full width for inputs */
+    padding: 10px; /* Padding inside inputs */
+    border: 1px solid #ccc; /* Border for inputs */
+    border-radius: 4px; /* Rounded corners */
+    box-sizing: border-box; /* Include padding and border in element's total width */
 }
 
 input[type="checkbox"],
 input[type="radio"] {
-    margin-right: 5px;
+    margin-right: 5px; /* Space between checkbox/radio and label */
 }
 
-label {
-    margin-right: 15px;
+.checkbox-group,
+.radio-group {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Center items vertically */
 }
 
-.form-control {
-    width: 100%;
+.checkbox-group input,
+.radio-group input {
+    margin-right: 10px; /* Space between input and label */
+}
+
+.radio-option {
+    margin-right: 20px; /* Space between radio options */
+}
+
+/* Button Styles */
+.submit-button {
+    background-color: #f3a847; /* Green background for the button */
+    color: white; /* White text color */
+    border: none; /* Remove border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px 15px; /* Padding for button */
+    cursor: pointer; /* Pointer cursor on hover */
+    font-size: 16px; /* Font size for button text */
+    margin-top: 10px; /* Space above the button */
+}
+
+.submit-button:hover {
+    background-color: #45a049; /* Darker green on hover */
 }
 
 /* Order Summary Styles */
 .order-summary {
-    background-color: #f3f3f3;
-    padding: 10px;
-    border-radius: 4px;
-    margin-top: 20px;
+    margin-top: 20px; /* Space above the order summary */
+    padding: 10px; /* Padding inside the summary */
+    border: 1px solid #e0e0e0; /* Light border around the summary */
+    border-radius: 4px; /* Rounded corners */
+    background-color: #f9f9f9; /* Light background color for summary */
 }
 
 .order-summary p {
-    margin: 5px 0;
-}
+    margin: 5px 0; /* Space between summary paragraphs */
+}   
 
 /* Footer Styles */
-footer {
-    background-color: #232f3e;
-    color: white;
-    padding: 20px 0;
-    margin-top: 20px; /* This can remain for spacing from the content above */
-    font-size: 14px;
-    width: 100%; /* Ensure the footer takes full width */
-    position:absolute; /* Ensure it behaves normally in the flow */
-    left: 0; /* Optional: Align to the left */
-    right: 0; /* Optional: Align to the right */
+footer { 
+    background-color: #232f3e; 
+    color: white; 
+    padding: 20px 0; 
+    margin-top: 20px; /* This can remain for spacing from the content above */ 
+    font-size: 14px; 
+    width: 100%; /* Ensure the footer takes full width */ 
+    position:absolute; /* Ensure it behaves normally in the flow */ 
+    left: 0; /* Optional: Align to the left */ 
+    right: 0; /* Optional: Align to the right */ 
 }
 
 .footer-container {
@@ -213,7 +351,6 @@ footer {
     border-top: 1px solid #37475a;
 }
 
-
 /* Responsive Styles */
 @media (max-width: 768px) {
     .search-sort {
@@ -223,6 +360,16 @@ footer {
 
     .product-card {
         width: calc(50% - 20px); /* Adjust card width on smaller screens */
+    }
+
+    .checkout-container {
+        flex-direction: column; /* Stack cart and form on smaller screens */
+        gap: 20px; /* Maintain gap between stacked sections */
+    }
+
+    .cart-section,
+    .form-section {
+        width: 100%; /* Full width for both sections */
     }
 }
 
