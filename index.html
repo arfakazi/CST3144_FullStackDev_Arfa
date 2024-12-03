@@ -24,7 +24,6 @@
 
                 <ul class="navbar">
                     <li><a href="#home" class="home-active">Home</a></li>
-                    <li><a href="#categories">Categories</a></li>
                     <li><a href="#nbClass">Classes</a></li>
                     <li><a href="#aboutus">About Us</a></li>
                 </ul>
@@ -59,7 +58,7 @@
                     <div class="content">
                         <div v-for="Class in filteredClasses" class="product-card">
                             <figure>
-                                <img v-bind:src="Class.image" alt="Class Image" />
+                                <img v-bind:src="getLink(Class.image)" alt="Class Image" />
                             </figure>
                             <h2 v-text="Class.title"></h2>
                             <p v-html="Class.description"></p>
@@ -69,15 +68,15 @@
                             </button>
                             <button disabled v-else>Out of Stock</button>
                             <span
-                                v-if="Class.availableInventory === cartCount(Class.id)"
+                                v-if="Class.availableInventory === cartCount(Class._id)"
                                 class="all-out"
                                 >All out!</span
                             >
                             <span
-                                v-else-if="Class.availableInventory - cartCount(Class.id) < 5"
+                                v-else-if="Class.availableInventory - cartCount(Class._id) < 5"
                                 class="items-left"
                             >
-                                Only {{ Class.availableInventory - cartCount(Class.id) }} left!
+                                Only {{ Class.availableInventory - cartCount(Class._id) }} left!
                             </span>
                             <span v-else>Buy now!</span>
                         </div>
@@ -133,15 +132,43 @@
                     <button v-on:click="submitForm">Place Order</button>
                 </div>
             </main>
+            <footer>
+                <div class="footer-container">
+                    <div class="footer-about">
+                        <h4>About Us</h4>
+                        <p>
+                            At Ara's Classes, we offer a variety of engaging lessons tailored to
+                            your interests and skills. Join us to unlock your potential!
+                        </p>
+                    </div>
+                    <div class="footer-links">
+                        <h4>Quick Links</h4>
+                        <ul>
+                            <li><a href="#home">Home</a></li>
+                            <li><a href="#nbClass">Classes</a></li>
+                            <li><a href="#aboutus">About Us</a></li>
+                            <li><a href="#contact">Contact</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-contact">
+                        <h4>Contact Us</h4>
+                        <p>Email: info@arasclasses.com</p>
+                        <p>Phone: +1 (123) 456-7890</p>
+                        <p>Address: 123 Learning Lane, Knowledge City, EDU</p>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 Ara's Classes. All Rights Reserved.</p>
+                </div>
+            </footer>
         </div>
 
-        <script src="js/classes.js"></script>
         <script>
             let webstore = new Vue({
                 el: "#app",
                 data: {
                     sitename: "Ara's Classes",
-                    classes: classes, // Array from `classes.js`
+                    classes: [],
                     cart: [],
                     searchQuery: "",
                     sortCriteria: "",
@@ -166,15 +193,40 @@
                         UQ: "Umm Al Quwain",
                     },
                 },
+                created() {
+                    this.getLessons();
+                },
                 methods: {
+                    getLessons() {
+                        fetch("https://aras-classes.onrender.com/collection/Lessons", {
+                            method: "GET",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                        })
+                            .then((response) => response.json())
+                            .then((responseJSON) => {
+                                // Map fetched data to ensure _id is a string
+                                this.classes = responseJSON.map((item) => ({
+                                    ...item,
+                                    _id: String(item._id),
+                                }));
+                            })
+                            .catch((error) => {
+                                console.error("Error fetching subjects:", error);
+                            });
+                    },
+                    getLink(url) {
+                        return `https://aras-classes.onrender.com/${url}`;
+                    },
                     toggleCheckout() {
                         this.showClass = !this.showClass;
                     },
                     addToCart(Class) {
-                        this.cart.push(Class.id);
+                        this.cart.push(Class._id);
                     },
                     canAddToCart(Class) {
-                        return Class.availableInventory > this.cartCount(Class.id);
+                        return Class.availableInventory > this.cartCount(Class._id);
                     },
                     cartCount(id) {
                         return this.cart.filter((item) => item === id).length;

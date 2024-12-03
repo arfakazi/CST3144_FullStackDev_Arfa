@@ -153,6 +153,67 @@ label {
     margin: 5px 0;
 }
 
+/* Footer Styles */
+footer {
+    background-color: #232f3e;
+    color: white;
+    padding: 20px 0;
+    margin-top: 20px; /* This can remain for spacing from the content above */
+    font-size: 14px;
+    width: 100%; /* Ensure the footer takes full width */
+    position:absolute; /* Ensure it behaves normally in the flow */
+    left: 0; /* Optional: Align to the left */
+    right: 0; /* Optional: Align to the right */
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto; /* Center the content within the footer */
+    padding: 0 20px; /* Padding inside the footer */
+}
+
+.footer-about,
+.footer-links,
+.footer-contact {
+    flex: 1;
+    margin: 10px;
+}
+
+.footer-about p,
+.footer-contact p {
+    margin: 5px 0;
+}
+
+.footer-links ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.footer-links ul li {
+    margin: 5px 0;
+}
+
+.footer-links ul li a {
+    color: #febd69;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.footer-links ul li a:hover {
+    color: #f3a847;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 10px;
+    padding: 10px 0;
+    border-top: 1px solid #37475a;
+}
+
+
 /* Responsive Styles */
 @media (max-width: 768px) {
     .search-sort {
