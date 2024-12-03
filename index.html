@@ -25,9 +25,10 @@
                 <h1 v-text="sitename"></h1>
                 <ul class="navbar">
                     <li><a href="#app">Home</a></li>
+                    <li><a v-on:click="toggleCheckout">Classes</a></li>
                     <li><a href="#aboutus">About Us</a></li>
                 </ul>
-                <button v-on:click="toggleCheckout">
+                <button v-on:click="toggleCheckout" :disabled="cartItemCount === 0">
                     {{ cartItemCount }} <span class="fas fa-cart-plus"></span> Checkout
                 </button>
             </header>
@@ -101,7 +102,8 @@
                         <div v-if="cart.length === 0">Your cart is empty.</div>
                         <ul>
                             <li v-for="item in uniqueCartItems" :key="item._id">
-                                {{ item.title }} - Price: {{ item.price }} (Count: {{ }})
+                                {{ item.title }} - Price: {{ item.price }} (Count: {{
+                                cartCount(item._id) }})
                                 <button v-on:click="removeFromCart(item._id)">Remove</button>
                             </li>
                         </ul>
@@ -185,7 +187,13 @@
                             <p>Delivery: {{ order.method }}</p>
                         </div>
 
-                        <button v-on:click="submitForm" class="submit-button">Place Order</button>
+                        <button
+                            v-on:click="submitForm"
+                            class="submit-button"
+                            :disabled="!isFormValid"
+                        >
+                            Place Order
+                        </button>
                     </div>
                 </div>
             </main>
@@ -335,20 +343,91 @@
                     getLink(image) {
                         return `https://aras-classes.onrender.com/${image}`;
                     },
+                    updateSpaces() {
+                        this.uniqueCartItems.forEach((item) => {
+                            const spacesLeft = item.availableInventory - this.cartCount(item._id);
+
+                            const updatedClasses = { availableInventory: spacesLeft };
+
+                            // Send updated spaces to the backend
+                            fetch(
+                                `https://aras-classes.onrender.com/collection/Lessons/${item._id}`,
+                                {
+                                    method: "PUT",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                    },
+                                    body: JSON.stringify(updatedClasses),
+                                }
+                            )
+                                .then((response) => response.json())
+                                .then((responseJSON) => {
+                                    if (responseJSON.msg === "success") {
+                                        console.log(`Updated spaces for Class: ${item._id}`);
+                                    } else {
+                                        console.error(
+                                            `Failed to update spaces for Class: ${item._id}`
+                                        );
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error("Error updating Class:", error);
+                                });
+                        });
+                    },
                     submitForm() {
-                        alert("Order placed successfully!");
-                        this.cart = [];
-                        this.order = {
-                            firstName: "",
-                            lastName: "",
-                            address: "",
-                            phone: "",
-                            zip: "",
-                            state: "",
-                            method: "Home",
-                            gift: false,
+                        if (!this.isFormValid) {
+                            alert("Please fill in all required fields."); // Notify the user if validation fails
+                            return; // Prevent submission if validation fails
+                        }
+
+                        const newOrder = {
+                            order: this.order, // Customer details
+                            cart: this.cart.map((item) => ({
+                                id: item._id,
+                                title: item.title,
+                                price: item.price,
+                                count: this.cartCount(item._id), // Include count of each item
+                            })), // Items in the cart with counts
                         };
-                        this.showClass = true;
+
+                        // Send order details to the backend
+                        fetch("https://aras-classes.onrender.com/collection/Orders", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify(newOrder),
+                        })
+                            .then((response) => {
+                                if (!response.ok) {
+                                    throw new Error("Network response was not ok");
+                                }
+                                return response.json();
+                            })
+                            .then((responseJSON) => {
+                                alert("Order submitted successfully!"); // Notify the user
+                                this.updateSpaces(); // Update the available spaces for Classes
+                                this.cart = []; // Clear the cart
+                                this.order = {
+                                    // Reset the order form
+                                    firstName: "",
+                                    lastName: "",
+                                    address: "",
+                                    phone: "",
+                                    zip: "",
+                                    state: "",
+                                    method: "Home",
+                                    gift: false,
+                                };
+                                location.reload();
+                            })
+                            .catch((error) => {
+                                console.error("Error submitting order:", error);
+                                alert(
+                                    "There was an error submitting your order. Please try again."
+                                ); // Notify the user of the error
+                            });
                     },
                 },
                 computed: {
@@ -359,6 +438,17 @@
                         return [...new Set(this.cart.map((item) => item._id))].map((id) => {
                             return this.classes.find((classItem) => classItem._id === id);
                         });
+                    },
+                    isFormValid() {
+                        return (
+                            this.order.firstName &&
+                            this.order.lastName &&
+                            this.order.address &&
+                            this.order.phone &&
+                            this.order.state &&
+                            this.order.zip &&
+                            this.order.method
+                        );
                     },
                     filteredClasses() {
                         // Filter by search query

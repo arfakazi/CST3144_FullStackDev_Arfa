@@ -274,10 +274,6 @@ input[type="radio"] {
     margin-top: 10px; /* Space above the button */
 }
 
-.submit-button:hover {
-    background-color: #45a049; /* Darker green on hover */
-}
-
 /* Order Summary Styles */
 .order-summary {
     margin-top: 20px; /* Space above the order summary */
