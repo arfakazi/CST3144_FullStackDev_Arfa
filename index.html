@@ -396,34 +396,48 @@
                     // Update available spaces for each class in the backend
                     updateSpaces() {
                         this.uniqueCartItems.forEach((item) => {
-                            const spacesLeft = item.availableInventory - this.cartCount(item._id);
+                            // Calculate the number of items being purchased from the cart
+                            const countInCart = this.cartCount(item._id);
+                            const spacesLeft = item.availableInventory - countInCart;
 
-                            const updatedClasses = { availableInventory: spacesLeft };
+                            // Only update if there are spaces left
+                            if (spacesLeft >= 0) {
+                                const updatedClasses = { availableInventory: spacesLeft };
 
-                            // Send updated inventory data to the backend
-                            fetch(
-                                `https://aras-classes.onrender.com/collection/Lessons/${item._id}`,
-                                {
-                                    method: "PUT",
-                                    headers: {
-                                        "Content-Type": "application/json",
-                                    },
-                                    body: JSON.stringify(updatedClasses), // Send updated data as JSON
-                                }
-                            )
-                                .then((response) => response.json())
-                                .then((responseJSON) => {
-                                    if (responseJSON.msg === "success") {
-                                        console.log(`Updated spaces for Class: ${item._id}`);
-                                    } else {
-                                        console.error(
-                                            `Failed to update spaces for Class: ${item._id}`
-                                        );
+                                // Send updated inventory data to the backend
+                                fetch(
+                                    `https://aras-classes.onrender.com/collection/Lessons/${item._id}`,
+                                    {
+                                        method: "PUT",
+                                        headers: {
+                                            "Content-Type": "application/json",
+                                        },
+                                        body: JSON.stringify(updatedClasses), // Send updated data as JSON
                                     }
-                                })
-                                .catch((error) => {
-                                    console.error("Error updating Class:", error); // Log any errors
-                                });
+                                )
+                                    .then((response) => {
+                                        if (!response.ok) {
+                                            throw new Error("Network response was not ok");
+                                        }
+                                        return response.json();
+                                    })
+                                    .then((responseJSON) => {
+                                        if (responseJSON.msg === "success") {
+                                            console.log(`Updated spaces for Class: ${item._id}`);
+                                        } else {
+                                            console.error(
+                                                `Failed to update spaces for Class: ${item._id}`
+                                            );
+                                        }
+                                    })
+                                    .catch((error) => {
+                                        console.error("Error updating Class:", error); // Log any errors
+                                    });
+                            } else {
+                                console.warn(
+                                    `Not enough inventory for Class: ${item._id}. Available: ${item.availableInventory}, Requested: ${countInCart}`
+                                );
+                            }
                         });
                     },
 
