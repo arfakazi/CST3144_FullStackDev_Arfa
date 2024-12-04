@@ -23,11 +23,14 @@
                     <span class="fas fa-school"></span>
                 </a>
                 <h1 v-text="sitename"></h1>
+                <!--NavBar Heading-->
+                <!--NavBar buttons-->
                 <ul class="navbar">
                     <li><a href="#app">Home</a></li>
                     <li><a v-on:click="toggleCheckout">Classes</a></li>
                     <li><a href="#aboutus">About Us</a></li>
                 </ul>
+                <!--Checkout button-->
                 <button v-on:click="toggleCheckout" :disabled="cartItemCount === 0">
                     {{ cartItemCount }} <span class="fas fa-cart-plus"></span> Checkout
                 </button>
@@ -37,7 +40,9 @@
             <main>
                 <!-- Class Display Section -->
                 <div v-if="showClass">
+                    <!--Search and Sort Container-->
                     <div class="search-sort">
+                        <!--Search Section-->
                         <h3>Search:</h3>
                         <input
                             type="text"
@@ -46,6 +51,7 @@
                             v-model="searchQuery"
                             v-on:input="searchClasses"
                         />
+                        <!--Sort Section-->
                         <h3>Sort:</h3>
                         <div class="sort-controls">
                             <button v-on:click="sortBy('title', 'asc')">Sort by Name (A-Z)</button>
@@ -64,9 +70,11 @@
                             </button>
 
                             <button v-on:click="resetSort">Reset View</button>
+                            <!--Reset button to clear sort-->
                         </div>
                     </div>
 
+                    <!--Classes Display Area-->
                     <div class="content">
                         <div v-for="Class in filteredClasses" :key="Class._id" class="product-card">
                             <figure>
@@ -74,7 +82,12 @@
                             </figure>
                             <h2 v-text="Class.title"></h2>
                             <p v-html="Class.description"></p>
+                            <div class="checkbox-group" style="justify-content: center">
+                                <span class="fas fa-map-pin" style="margin: 4px"></span>
+                                <p v-html="Class.location"></p>
+                            </div>
                             <p class="price">Price: {{ Class.price }}</p>
+                            <!--Add to Cart Button-->
                             <button v-on:click="addToCart(Class)" v-if="canAddToCart(Class)">
                                 Add to cart
                             </button>
@@ -90,25 +103,27 @@
                                 >Only {{ Class.availableInventory - cartCount(Class._id) }}
                                 left!</span
                             >
-                            <span v-else>Buy now!</span>
+                            <span v-else>Buy now! 5 Slots available</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Checkout Section -->
                 <div v-else class="checkout-container">
+                    <!--Cart Area-->
                     <div class="cart-section">
                         <h3>Your Cart</h3>
                         <div v-if="cart.length === 0">Your cart is empty.</div>
                         <ul>
                             <li v-for="item in uniqueCartItems" :key="item._id">
-                                {{ item.title }} - Price: {{ item.price }} (Count: {{
+                                {{ item.title }} - Price: {{ item.price }} (Quantity: {{
                                 cartCount(item._id) }})
                                 <button v-on:click="removeFromCart(item._id)">Remove</button>
                             </li>
                         </ul>
                     </div>
 
+                    <!--Checkout Form-->
                     <div class="order-form">
                         <h2>Checkout</h2>
                         <div class="form-group">
@@ -175,6 +190,7 @@
                             </div>
                         </div>
 
+                        <!--Order Summary Section-->
                         <h2>Order Summary</h2>
                         <div class="order-summary">
                             <p>First Name: {{ order.firstName }}</p>
@@ -187,6 +203,7 @@
                             <p>Delivery: {{ order.method }}</p>
                         </div>
 
+                        <!--Submit Order button-->
                         <button
                             v-on:click="submitForm"
                             class="submit-button"
@@ -227,26 +244,33 @@
                 </div>
             </footer>
         </div>
+
+        <!--Vue Script-->
         <script>
             let webstore = new Vue({
+                // Mount Vue instance to the element with ID "app"
                 el: "#app",
+
+                // Define the reactive data properties for the app
                 data: {
-                    sitename: "Ara's Classes",
-                    classes: [],
-                    cart: [],
-                    currentSort: null,
-                    sortOrder: null,
-                    showClass: true,
+                    sitename: "Ara's Classes", // The name of the webstore
+                    classes: [], // Array to hold class data fetched from the backend
+                    cart: [], // Array to store items added to the cart
+                    currentSort: null, // Tracks the current sorting criteria
+                    sortOrder: null, // Tracks the current sorting order (asc/desc)
+                    showClass: true, // Controls visibility of the class listing or checkout page
                     order: {
+                        // Object to hold order form input fields
                         firstName: "",
                         lastName: "",
                         address: "",
                         phone: "",
                         zip: "",
                         state: "",
-                        method: "Home",
+                        method: "Home", // Delivery method, default set to "Home"
                         gift: false,
                     },
+                    // Key-value pairs for state options
                     states: {
                         AD: "Abu Dhabi",
                         DU: "Dubai",
@@ -256,12 +280,17 @@
                         RK: "Ras Al Khaimah",
                         UQ: "Umm Al Quwain",
                     },
-                    searchQuery: "",
+                    searchQuery: "", // Stores the user's search input
                 },
+
+                // Executed when the Vue instance is created
                 created() {
-                    this.getLessons();
+                    this.getLessons(); // Fetch initial class data from the backend
                 },
+
+                // Define the methods available for the Vue instance
                 methods: {
+                    // Fetch all class data from the backend
                     getLessons() {
                         fetch("https://aras-classes.onrender.com/collection/Lessons", {
                             method: "GET",
@@ -269,8 +298,9 @@
                                 "Content-Type": "application/json",
                             },
                         })
-                            .then((response) => response.json())
+                            .then((response) => response.json()) // Parse the response as JSON
                             .then((responseJSON) => {
+                                // Map the data to ensure all IDs are strings
                                 this.classes = responseJSON.map((item) => ({
                                     ...item,
                                     _id: String(item._id),
@@ -280,11 +310,13 @@
                                 console.error("Error fetching Classes:", error);
                             });
                     },
-                    sortBy(key, order) {
-                        this.currentSort = key;
-                        this.sortOrder = order;
 
-                        // Sort logic
+                    // Sort the classes array by the given key and order
+                    sortBy(key, order) {
+                        this.currentSort = key; // Set the sort criteria
+                        this.sortOrder = order; // Set the sort order
+
+                        // Sorting logic for the classes array
                         this.classes.sort((a, b) => {
                             const valA = a[key];
                             const valB = b[key];
@@ -294,16 +326,20 @@
                             return 0;
                         });
                     },
+
+                    // Reset the sorting to the original order by refetching the data
                     resetSort() {
                         this.currentSort = null;
                         this.sortOrder = null;
-                        this.getLessons(); // Reset to original order
+                        this.getLessons(); // Fetch the original order
                     },
+
+                    // Search classes based on the searchQuery input
                     searchClasses() {
-                        const query = this.searchQuery.trim();
+                        const query = this.searchQuery.trim(); // Trim whitespace from the search query
 
                         if (query === "") {
-                            this.getLessons(); // Fetch all Classes if search query is empty
+                            this.getLessons(); // Fetch all classes if the search query is empty
                             return;
                         }
 
@@ -314,42 +350,57 @@
                                 "Content-Type": "application/json",
                             },
                         })
-                            .then((response) => response.json())
+                            .then((response) => response.json()) // Parse the response as JSON
                             .then((data) => {
+                                // Map the data to ensure all IDs are strings
                                 this.classes = data.map((item) => ({
                                     ...item,
                                     _id: String(item._id),
                                 }));
                             })
                             .catch((error) => {
-                                console.error("Error performing search:", error);
+                                console.error("Error performing search:", error); // Log any errors
                             });
                     },
+
+                    // Toggle the visibility of the checkout page and class list
                     toggleCheckout() {
-                        this.showClass = !this.showClass;
+                        this.showClass = !this.showClass; // Invert the current value
                     },
+
+                    // Add a class to the cart
                     addToCart(Class) {
                         this.cart.push(Class);
                     },
+
+                    // Remove a class from the cart by ID
                     removeFromCart(classId) {
                         this.cart = this.cart.filter((item) => item._id !== classId);
                     },
+
+                    // Check if a class can be added to the cart based on availability
                     canAddToCart(Class) {
                         return Class.availableInventory > this.cartCount(Class._id);
                     },
+
+                    // Count the number of times a specific class is in the cart
                     cartCount(id) {
                         return this.cart.filter((item) => item._id === id).length;
                     },
+
+                    // Get the full URL for an image
                     getLink(image) {
                         return `https://aras-classes.onrender.com/${image}`;
                     },
+
+                    // Update available spaces for each class in the backend
                     updateSpaces() {
                         this.uniqueCartItems.forEach((item) => {
                             const spacesLeft = item.availableInventory - this.cartCount(item._id);
 
                             const updatedClasses = { availableInventory: spacesLeft };
 
-                            // Send updated spaces to the backend
+                            // Send updated inventory data to the backend
                             fetch(
                                 `https://aras-classes.onrender.com/collection/Lessons/${item._id}`,
                                 {
@@ -357,7 +408,7 @@
                                     headers: {
                                         "Content-Type": "application/json",
                                     },
-                                    body: JSON.stringify(updatedClasses),
+                                    body: JSON.stringify(updatedClasses), // Send updated data as JSON
                                 }
                             )
                                 .then((response) => response.json())
@@ -371,24 +422,21 @@
                                     }
                                 })
                                 .catch((error) => {
-                                    console.error("Error updating Class:", error);
+                                    console.error("Error updating Class:", error); // Log any errors
                                 });
                         });
                     },
+
+                    // Submit the order form and process the order
                     submitForm() {
                         if (!this.isFormValid) {
-                            alert("Please fill in all required fields."); // Notify the user if validation fails
+                            alert("Please fill in all required fields.");
                             return; // Prevent submission if validation fails
                         }
 
                         const newOrder = {
                             order: this.order, // Customer details
-                            cart: this.cart.map((item) => ({
-                                id: item._id,
-                                title: item.title,
-                                price: item.price,
-                                count: this.cartCount(item._id), // Include count of each item
-                            })), // Items in the cart with counts
+                            cart: this.uniqueCartItems, // Items in the cart
                         };
 
                         // Send order details to the backend
@@ -407,7 +455,7 @@
                             })
                             .then((responseJSON) => {
                                 alert("Order submitted successfully!"); // Notify the user
-                                this.updateSpaces(); // Update the available spaces for Classes
+                                this.updateSpaces(); // Update the available spaces for classes
                                 this.cart = []; // Clear the cart
                                 this.order = {
                                     // Reset the order form
@@ -420,26 +468,29 @@
                                     method: "Home",
                                     gift: false,
                                 };
-                                location.reload();
+                                location.reload(); // Reload the page to reset
                             })
                             .catch((error) => {
-                                console.error("Error submitting order:", error);
+                                console.error("Error submitting order:", error); // Log any errors
                                 alert(
                                     "There was an error submitting your order. Please try again."
-                                ); // Notify the user of the error
+                                ); // Notify the user
                             });
                     },
                 },
+
+                // Define computed properties for dynamic data
                 computed: {
                     cartItemCount() {
-                        return this.cart.length || 0;
+                        return this.cart.length || 0; // Return the number of items in the cart
                     },
                     uniqueCartItems() {
                         return [...new Set(this.cart.map((item) => item._id))].map((id) => {
-                            return this.classes.find((classItem) => classItem._id === id);
+                            return this.classes.find((classItem) => classItem._id === id); // Find unique cart items by ID
                         });
                     },
                     isFormValid() {
+                        // Check if all required order form fields are filled
                         return (
                             this.order.firstName &&
                             this.order.lastName &&
@@ -451,12 +502,12 @@
                         );
                     },
                     filteredClasses() {
-                        // Filter by search query
+                        // Filter and sort classes dynamically based on search and sorting criteria
                         let filtered = this.classes.filter((Class) =>
                             Class.title.toLowerCase().includes(this.searchQuery.toLowerCase())
                         );
 
-                        // Sort by selected criteria
+                        // Apply sorting if a sort criterion is selected
                         if (this.currentSort) {
                             filtered.sort((a, b) => {
                                 const valA = a[this.currentSort];
@@ -464,11 +515,12 @@
 
                                 if (this.sortOrder === "asc") return valA > valB ? 1 : -1;
                                 if (this.sortOrder === "desc") return valA < valB ? 1 : -1;
-                                return 0;
+
+                                return 0; // Default to no change if sort order is not set
                             });
                         }
 
-                        return filtered;
+                        return filtered; // Return the filtered and/or sorted array of classes
                     },
                 },
             });
